@@ -19,13 +19,20 @@ class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True,required=True)
 
     class Meta:
-        models = api_models.User
+        model = api_models.User
         fields = ['full_name','email','password','password2']
 
     def validate(self,attr):
         if attr['password'] != attr['password2']:
             raise serializers.ValidationError({"password":"password did'nt match"})
         
+        if api_models.User.objects.filter(email=attr['email']).exists():
+            raise serializers.ValidationError({"email": "Email already exists"})
+        
+        # Validasi username unique (karena username dibuat dari email)
+        email_username = attr['email'].split("@")[0]
+        if api_models.User.objects.filter(username=email_username).exists():
+            raise serializers.ValidationError({"email": "Email cannot be used because username already exists"})
         return attr
     
     def create(self,validated_data):
@@ -34,10 +41,10 @@ class RegisterSerializer(serializers.ModelSerializer):
             email = validated_data['email'],
         )
 
-        email_username,mobile = user.email.split("@")
+        email_username, mobile = user.email.split("@")
         user.username=email_username
 
-        user.set_password(validate_password['password'])
+        user.set_password(validated_data['password'])
         user.save()
 
         return user
@@ -45,16 +52,18 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.User
         fields = "__all__"
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.Profile
         fields = "__all__"
+
 class CategorySerializer(serializers.ModelSerializer):
     def get_post_count(self,category):
         return category.post.count()
     
     class Meta:
-        models = api_models.Category
+        model = api_models.Category
         field=["id","title","image","slug","post_count"]
 
 class CommentSerializer(serializers.ModelSerializer):
