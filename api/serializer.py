@@ -48,6 +48,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+    
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = api_models.User
@@ -64,7 +65,7 @@ class CategorySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = api_models.Category
-        field=["id","title","image","slug","post_count"]
+        fields=["id","title","image","slug","post_count"]
 
 class CommentSerializer(serializers.ModelSerializer):
 
@@ -106,7 +107,7 @@ class BookmarkSerializer(serializers.ModelSerializer):
         if request and request.method == "POST":
             self.Meta.depth = 0
         else:
-            self.Meta.depth = 1
+            self.Meta.depth = 0
 
 class NotificationSerializer(serializers.ModelSerializer):
 
@@ -120,7 +121,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         if request and request.method == "POST":
             self.Meta.depth = 0
         else:
-            self.Meta.depth = 1
+            self.Meta.depth = 0
 
      
 class AuthorSerializer(serializers.ModelSerializer):

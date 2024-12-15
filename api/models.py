@@ -1,7 +1,8 @@
 from django.db import models
 
 from django.contrib.auth.models import AbstractUser
-
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.utils.text import slugify
 from shortuuid.django_fields import ShortUUIDField
@@ -47,6 +48,7 @@ class Profile(models.Model):
             return str(self.full_name)
         else:
             return str(self.user.full_name)
+
     
     def save(self, *args, **kwargs):
         #babah@gmail.com
