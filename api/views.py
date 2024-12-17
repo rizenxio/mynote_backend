@@ -171,10 +171,10 @@ class BookmarkPostApiView(APIView):
         user = api_models.User.objects.get(id=user_id)
         post = api_models.Post.objects.get(id=post_id)
 
-        bookmark = api_models.Bookmark.objects.filter(post=post,user=user).first()
+        bookmarks = api_models.Bookmark.objects.filter(post=post,user=user).first()
 
-        if bookmark:
-            bookmark.delete()
+        if bookmarks:
+            bookmarks.delete()
             return Response({"message":"Post unbookmark"},status=status.HTTP_200_OK)
         else:
             api_models.Bookmark.objects.create(
@@ -191,5 +191,31 @@ class BookmarkPostApiView(APIView):
         
             return Response({"message":"Post Bookmarked"},status=status.HTTP_201_CREATED)
 
+class DashboardStats(generics.ListAPIView):
+    serializer_class = api_serializer.DashboardStatsSerializer  # Gunakan serializer yang baru
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        user_id = self.kwargs["user_id"]
+        user = api_models.User.objects.get(id=user_id)
+
+        posts_query = api_models.Post.objects.filter(user=user)
+        
+        views = posts_query.aggregate(view=Sum("view"))["view"] or 0
+        posts = posts_query.count()
+        likes = sum(post.likes.count() for post in posts_query)
+        bookmarks = api_models.Bookmark.objects.filter(post__user=user).count()
+
+        return [{
+            "views": views,
+            "posts": posts,
+            "likes": likes,
+            "bookmarks": bookmarks,
+        }]
+    
+    def list(self,request,*args,**kwargs):
+        queryset = self.get_queryset()
+        serializer=self.get_serializer(queryset,many=True)
+        return Response(serializer.data)
 
 

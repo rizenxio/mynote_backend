@@ -181,6 +181,7 @@ JAZZMIN_SETTINGS = {
     "site_brand": "blog modern",
     # "site_icon": "images/favicon.ico",
     # "site_logo": "images/logos/logo.jpg",
+     "hide_recent_activity": True,
     "welcome_sign": "Welcome To Babah",
     "copyright": "Bahrur",
     "user_avatar": "images/photos/logo.jpg",
